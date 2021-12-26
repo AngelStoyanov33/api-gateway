@@ -15,4 +15,7 @@ public interface GatewayConfig {
 
     @WithName("authentication.svc.url")
     String getAuthenticationServiceUri();
+
+    @WithName("user.management.svc.url")
+    String getUserManagementServiceUri();
 }
