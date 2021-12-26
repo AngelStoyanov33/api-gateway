@@ -3,6 +3,7 @@ package me.angelstoyanov.sporton.apigw;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.runtime.configuration.ProfileManager;
 import me.angelstoyanov.sporton.apigw.bean.Authenticator;
+import me.angelstoyanov.sporton.apigw.bean.TransitAppender;
 import me.angelstoyanov.sporton.apigw.config.GatewayConfig;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -30,6 +31,7 @@ public class APIGateway extends RouteBuilder {
             from("platform-http:/apigw/authenticate")
                     .routeId("[API Gateway] [Authentication Service]")
                     .setHeader("User-Agent", constant("Sporton-API-Gateway/0.0.1-SNAPSHOT"))
+                    .bean(TransitAppender.class, "appendCorrelationID")
                     .bean(Authenticator.class, "authenticate")
                     .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
         }
