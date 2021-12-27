@@ -56,6 +56,14 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-minikube</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-health</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
+    </dependency>
 
     <!--- Camel Quarkus Dependencies -->
     <dependency>
