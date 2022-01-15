@@ -18,4 +18,7 @@ public interface GatewayConfig {
 
     @WithName("user.management.svc.url")
     String getUserManagementServiceUri();
+
+    @WithName("pitch.management.svc.url")
+    String getPitchManagementServiceUri();
 }
