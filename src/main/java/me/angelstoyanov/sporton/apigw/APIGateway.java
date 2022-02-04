@@ -5,10 +5,12 @@ import io.quarkus.runtime.configuration.ProfileManager;
 import me.angelstoyanov.sporton.apigw.bean.Authenticator;
 import me.angelstoyanov.sporton.apigw.bean.TransitAppender;
 import me.angelstoyanov.sporton.apigw.config.GatewayConfig;
+import me.angelstoyanov.sporton.apigw.exception.ServiceDownException;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.http.base.HttpOperationFailedException;
+import org.apache.http.HttpStatus;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -31,8 +33,18 @@ public class APIGateway extends RouteBuilder {
         onException(HttpOperationFailedException.class)
                 .process(exchange -> {
                     HttpOperationFailedException e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, HttpOperationFailedException.class);
-                    exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, e.getStatusCode());
-                    exchange.getIn().setBody(e.getResponseBody());
+                    int errorCode = e.getStatusCode();
+                    if(errorCode != HttpStatus.SC_FORBIDDEN && errorCode != HttpStatus.SC_UNAUTHORIZED) {
+                        exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, errorCode);
+                        exchange.getIn().setBody(e.getResponseBody());
+                    }
+                }).handled(true);
+
+        onException(ServiceDownException.class)
+                .process(exchange -> {
+                    ServiceDownException e = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, ServiceDownException.class);
+                    exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.SC_GATEWAY_TIMEOUT);
+                        exchange.getIn().setBody(e.getMessage());
                 }).handled(true);
 
         from("direct:userManagement")
