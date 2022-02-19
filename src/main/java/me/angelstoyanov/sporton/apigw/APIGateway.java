@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 @Named("APIGateway")
-@RegisterForReflection
+@RegisterForReflection(targets = {HttpOperationFailedException.class, APIGateway.class, HttpStatus.class}, serialization = true)
 @ApplicationScoped
 public class APIGateway extends RouteBuilder {
 
@@ -29,6 +29,8 @@ public class APIGateway extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+        this.getCamelContext().setManagementName("sporton-apigw");
 
         onException(HttpOperationFailedException.class)
                 .process(exchange -> {
