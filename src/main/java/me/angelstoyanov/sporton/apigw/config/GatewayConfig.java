@@ -21,4 +21,31 @@ public interface GatewayConfig {
 
     @WithName("pitch.management.svc.url")
     String getPitchManagementServiceUri();
+
+    @WithName("session.management.svc.url")
+    String getSessionManagementServiceUri();
+
+    @WithName("feedback.management.svc.url")
+    String getFeedbackManagementServiceUri();
+
+    @WithName("azure.storage.adapter.svc.url")
+    String getAzureStorageAdapterServiceUri();
+
+    @WithName("common.svc.url")
+    String getCommonServiceUri();
+
+    @WithName("http.user.agent.name")
+    String getHttpUserAgentName();
+
+    @WithName("http.user.agent.version")
+    String getHttpUserAgentVersion();
+
+    @WithName("camel.route.http.quota.per-second")
+    String getCamelRouteHttpQuotaPerSecond();
+
+    @WithName("authentication.user.id.header.name")
+    String getRequestingUserIdHeaderName();
+
+    @WithName("authentication.user.role.header.name")
+    String getRequestingUserRoleHeaderName();
 }
