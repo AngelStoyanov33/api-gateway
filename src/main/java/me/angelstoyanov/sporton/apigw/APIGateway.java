@@ -176,6 +176,7 @@ public class APIGateway extends RouteBuilder {
                 .routeId("[API Gateway] [REST] [FEEDBACK-MANAGEMENT-SVC][COMMENT]")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
+                .bean(StorageAdapter.class, "prepareMultipartBody")
                 .bean(TransitAppender.class, "appendCorrelationID")
                 .bean(Authenticator.class, "authenticate")
                 .choice()
