@@ -82,6 +82,16 @@ public class APIGateway extends RouteBuilder {
                 .toD(gatewayConfig.getSessionManagementServiceUri() + "/session?${header.CamelHttpRawQuery}&bridgeEndpoint=true")
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
 
+        from("direct:commonService")
+                .routeId("[API Gateway] [DIRECT] [COMMON-SVC]")
+                .choice()
+                .when(simple("${header.CamelHttpUri} regex '^/apigw/rest/api/v1/admin/common/(.*)$'"))
+                .removeHeaders("CamelHttpU*").removeHeaders("Host*")
+                .toD(gatewayConfig.getCommonServiceUri() + "/common/${header.*}?bridgeEndpoint=true")
+                .otherwise()
+                .toD(gatewayConfig.getCommonServiceUri() + "/common?${header.CamelHttpRawQuery}&bridgeEndpoint=true")
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
+
         from("direct:commentManagement")
                 .routeId("[API Gateway] [DIRECT] [FEEDBACK-MANAGEMENT-SVC][COMMENT]")
                 .choice()
@@ -123,7 +133,6 @@ public class APIGateway extends RouteBuilder {
                 .removeHeaders("CamelHttpU*").removeHeaders("Host*")
                 .bean(StorageAdapter.class, "doPitchFetch")
                 .toD(gatewayConfig.getAzureStorageAdapterServiceUri() + "/fetch?${header.CamelHttpRawQuery}&bridgeEndpoint=true")
-
                 .otherwise()
                 .process(exchange -> {
                     exchange.getIn().setBody(null);
@@ -176,6 +185,7 @@ public class APIGateway extends RouteBuilder {
                 .routeId("[API Gateway] [REST] [FEEDBACK-MANAGEMENT-SVC][COMMENT]")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
+                .convertBodyTo(byte[].class)
                 .bean(TransitAppender.class, "appendCorrelationID")
                 .bean(Authenticator.class, "authenticate")
                 .choice()
@@ -220,6 +230,20 @@ public class APIGateway extends RouteBuilder {
                 .choice()
                 .when(simple("${header.CamelHttpResponseCode} != 401"))
                 .to("direct:storagePitchManagement")
+                .end()
+                .bean(Authenticator.class, "cleanInnerAuthorization")
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
+
+        from("platform-http:/apigw/rest/api/v1/admin/common*")
+                .routeId("[API Gateway] [REST] [COMMON-SVC]")
+                .throttle(throttle)
+                .setHeader("User-Agent", constant(userAgent))
+                .bean(TransitAppender.class, "appendCorrelationID")
+                .bean(Authenticator.class, "authenticate")
+                .choice()
+                .when(simple("${header.CamelHttpResponseCode} != 401" +
+                        " && ${header.X-Requesting-User-Role} =~ 'ADMIN'"))
+                .to("direct:commonService")
                 .end()
                 .bean(Authenticator.class, "cleanInnerAuthorization")
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));

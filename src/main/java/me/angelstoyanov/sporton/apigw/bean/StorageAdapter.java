@@ -14,22 +14,21 @@ public class StorageAdapter {
 
     final String incomingStorageUri = "/apigw/rest/api/v1/blob";
 
-    public void doCommentFetch(Exchange exchange){
+    public void doCommentFetch(Exchange exchange) {
         String entityId = StringUtils.substringAfter(
                 String.valueOf(exchange.getMessage().getHeader("CamelHttpPath")), incomingStorageUri + "/c/");
 
         setHeaders(exchange, entityId, StorageEntity.IMAGE_COMMENT);
-
     }
 
-    public void doPitchFetch(Exchange exchange){
+    public void doPitchFetch(Exchange exchange) {
         String entityId = StringUtils.substringAfter(
                 String.valueOf(exchange.getMessage().getHeader("CamelHttpPath")), incomingStorageUri + "/p/");
 
         setHeaders(exchange, entityId, StorageEntity.IMAGE_PITCH);
     }
 
-    private void setHeaders(Exchange exchange, String entityId, StorageEntity entityType){
+    private void setHeaders(Exchange exchange, String entityId, StorageEntity entityType) {
         exchange.getMessage().setHeader("CamelHttpQuery",
                 "entityId=" + entityId + "&entityType=" + entityType);
         exchange.getMessage().setHeader("CamelHttpRawQuery",
