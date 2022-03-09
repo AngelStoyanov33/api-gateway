@@ -37,8 +37,10 @@ public class Authenticator {
         } catch (Exception e) {
             if (e instanceof HttpOperationFailedException) {
                 int statusCode = ((HttpOperationFailedException) e).getStatusCode();
-                if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN) {
+                if (statusCode == HttpStatus.SC_UNAUTHORIZED || statusCode == HttpStatus.SC_FORBIDDEN 
+                        || statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                     exchange.getIn().removeHeader("Authorization");
+                    statusCode = HttpStatus.SC_UNAUTHORIZED;
                 }
                 exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, statusCode);
                 exchange.getIn().setBody("");
