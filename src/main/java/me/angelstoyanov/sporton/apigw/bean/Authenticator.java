@@ -21,7 +21,8 @@ public class Authenticator {
     protected GatewayConfig gatewayConfig;
 
     public void authenticate(Exchange exchange) {
-
+        exchange.getMessage().removeHeader(gatewayConfig.getRequestingUserIdHeaderName());
+        exchange.getMessage().removeHeader(gatewayConfig.getRequestingUserRoleHeaderName());
         try (ProducerTemplate producerTemplate = exchange.getContext().createProducerTemplate()) {
             Exchange authenticationExchange = producerTemplate.send("vertx-http:" + gatewayConfig.getAuthenticationServiceUri() + "/authenticate?httpMethod=GET", innerExchange -> {
                 innerExchange.getIn().setHeader("Authorization", exchange.getMessage().getHeader("Authorization"));

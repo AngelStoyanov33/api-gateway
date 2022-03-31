@@ -5,7 +5,11 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.lang.annotation.Native;
 
 @RegisterForReflection
-public class LoggerAdditionalProperties {
+public class HTTPHeaderConstants {
+
+    private HTTPHeaderConstants() {
+    }
+
     @Native
     public static final String REQUEST_ID_HEADER_NAME = "X-Request-ID";
     @Native
