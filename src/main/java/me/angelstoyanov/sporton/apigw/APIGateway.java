@@ -3,6 +3,7 @@ package me.angelstoyanov.sporton.apigw;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.runtime.configuration.ProfileManager;
 import me.angelstoyanov.sporton.apigw.bean.Authenticator;
+import me.angelstoyanov.sporton.apigw.bean.CORSInterceptor;
 import me.angelstoyanov.sporton.apigw.bean.StorageAdapter;
 import me.angelstoyanov.sporton.apigw.bean.TransitAppender;
 import me.angelstoyanov.sporton.apigw.config.GatewayConfig;
@@ -143,6 +144,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/user*")
                 .routeId("[API Gateway] [REST] [USER-MANAGEMENT-SVC]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -157,6 +163,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/pitch*")
                 .routeId("[API Gateway] [REST] [PITCH-MANAGEMENT-SVC]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -170,6 +181,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/session*")
                 .routeId("[API Gateway] [REST] [SESSION-MANAGEMENT-SVC]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -183,6 +199,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/comment*")
                 .routeId("[API Gateway] [REST] [FEEDBACK-MANAGEMENT-SVC][COMMENT]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .convertBodyTo(byte[].class)
@@ -197,6 +218,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/rating*")
                 .routeId("[API Gateway] [REST] [FEEDBACK-MANAGEMENT-SVC][RATING]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -210,6 +236,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/blob/c*")
                 .routeId("[API Gateway] [REST] [AZURE-STORAGE-ADAPTER-SVC][C]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -223,6 +254,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/blob/p*")
                 .routeId("[API Gateway] [REST] [AZURE-STORAGE-ADAPTER-SVC][P]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -236,6 +272,11 @@ public class APIGateway extends RouteBuilder {
 
         from("platform-http:/apigw/rest/api/v1/admin/common*")
                 .routeId("[API Gateway] [REST] [COMMON-SVC]")
+                .choice()
+                .when(simple("${header.CamelHttpMethod} == 'OPTIONS'"))
+                .bean(CORSInterceptor.class, "allowCorsInput")
+                .otherwise()
+                .bean(CORSInterceptor.class, "allowCorsOutput")
                 .throttle(throttle)
                 .setHeader("User-Agent", constant(userAgent))
                 .bean(TransitAppender.class, "appendCorrelationID")
@@ -247,16 +288,5 @@ public class APIGateway extends RouteBuilder {
                 .end()
                 .bean(Authenticator.class, "cleanInnerAuthorization")
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
-
-        // Simple Authentication Service call to test the API Gateway (DEV Mode Only)
-        if (ProfileManager.getActiveProfile().equalsIgnoreCase("dev")) {
-            from("platform-http:/apigw/authenticate")
-                    .routeId("[API Gateway] [Authentication Service]")
-                    .setHeader("User-Agent", constant(userAgent))
-                    .bean(TransitAppender.class, "appendCorrelationID")
-                    .bean(Authenticator.class, "authenticate")
-                    .setHeader(Exchange.HTTP_RESPONSE_CODE, header("statusCode"));
-        }
-
     }
 }
